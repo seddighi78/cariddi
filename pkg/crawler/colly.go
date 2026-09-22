@@ -50,7 +50,7 @@ import (
 // New it's the actual crawler engine.
 // It controls all the behaviours of a scan
 // (event handlers, secrets, errors, extensions and endpoints scanning).
-func New(scan *Scan) *Results {
+func New(scan *Scan, limiter) *Results {
 	// This is to avoid to insert into the crawler target regular
 	// expression directories passed as input.
 	var targetTemp, protocolTemp string
@@ -120,6 +120,8 @@ func New(scan *Scan) *Results {
 	registerXMLEvents(c, event)
 
 	c.OnRequest(func(r *colly.Request) {
+		limiter.Take()
+
 		// Add headers (if needed) on each request
 		if (len(scan.Headers)) > 0 {
 			for header, value := range scan.Headers {

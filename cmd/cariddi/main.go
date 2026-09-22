@@ -36,9 +36,12 @@ import (
 	"github.com/edoardottt/cariddi/pkg/input"
 	"github.com/edoardottt/cariddi/pkg/output"
 	"github.com/edoardottt/cariddi/pkg/scanner"
+	"github.com/projectdiscovery/ratelimit"
 )
 
 func main() {
+
+
 	// Scan flags.
 	flags := input.ScanFlag()
 
@@ -89,6 +92,7 @@ func main() {
 		StoreResp:        flags.StoreResp,
 		MaxDepth:         flags.MaxDepth,
 		IgnoreExtensions: flags.IgnoreExtensions,
+		Rps:			  flags.Rps,
 	}
 
 	// Read the targets from standard input.
@@ -144,10 +148,12 @@ func main() {
 		config.Headers = input.GetHeaders(headersInput)
 	}
 
+	limiter := ratelimit.New(context.Background(), config.Rps, time.Duration(time.Second))
+
 	// For each target generate a crawler and collect all the results.
 	for _, target := range targets {
 		config.Target = target
-		results := crawler.New(config)
+		results := crawler.New(config, limiter)
 		finalResults = append(finalResults, results.URLs...)
 		finalSecret = append(finalSecret, results.Secrets...)
 		finalEndpoints = append(finalEndpoints, results.Endpoints...)

@@ -69,6 +69,7 @@ type Scan struct {
 	Concurrency int
 	Delay       int
 	Timeout     int
+	Rps			int
 
 	// Storage
 	SecretsSlice   []string
