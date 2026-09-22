@@ -106,7 +106,7 @@ type Input struct {
 	IgnoreExtensions StringSlice
 
 	// Number of of requests per seconds at all
-	RequestsPerSeconds int
+	Rps uint
 }
 
 // ScanFlag defines all the options taken

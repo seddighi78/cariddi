@@ -45,12 +45,13 @@ import (
 	"github.com/edoardottt/cariddi/pkg/scanner"
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
+	"github.com/projectdiscovery/ratelimit"
 )
 
 // New it's the actual crawler engine.
 // It controls all the behaviours of a scan
 // (event handlers, secrets, errors, extensions and endpoints scanning).
-func New(scan *Scan, limiter) *Results {
+func New(scan *Scan, limiter *ratelimit.Limiter) *Results {
 	// This is to avoid to insert into the crawler target regular
 	// expression directories passed as input.
 	var targetTemp, protocolTemp string
