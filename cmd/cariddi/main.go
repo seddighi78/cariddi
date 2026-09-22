@@ -41,6 +41,17 @@ import (
 	"github.com/projectdiscovery/ratelimit"
 )
 
+// newRateLimiter returns the rate limiter used for the whole scan.
+// When no -rps flag is provided (Rps = 0) an unlimited limiter is used,
+// otherwise a plain token bucket with zero tokens would starve and
+// block forever in Take().
+func newRateLimiter(ctx context.Context, rps uint) *ratelimit.Limiter {
+	if rps > 0 {
+		return ratelimit.New(ctx, rps, time.Second)
+	}
+	return ratelimit.NewUnlimited(ctx)
+}
+
 func main() {
 
 	// Scan flags.
@@ -150,14 +161,7 @@ func main() {
 	}
 
 	// Rate limiter applied to the whole scan (all targets).
-	// When no -rps flag is provided (Rps = 0) an unlimited limiter is used,
-	// otherwise a plain token bucket would starve and block forever.
-	var limiter *ratelimit.Limiter
-	if config.Rps > 0 {
-		limiter = ratelimit.New(context.Background(), config.Rps, time.Second)
-	} else {
-		limiter = ratelimit.NewUnlimited(context.Background())
-	}
+	limiter := newRateLimiter(context.Background(), config.Rps)
 
 	// For each target generate a crawler and collect all the results.
 	for _, target := range targets {

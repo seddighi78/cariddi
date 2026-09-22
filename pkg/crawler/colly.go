@@ -130,7 +130,9 @@ func New(scan *Scan, limiter *ratelimit.Limiter) *Results {
 			}
 		}
 
+		results.mutex.Lock()
 		results.URLs = append(results.URLs, r.URL.String())
+		results.mutex.Unlock()
 
 		if !scan.JSON {
 			fmt.Println(r.URL.String())
