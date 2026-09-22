@@ -27,10 +27,10 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
-	"context"
 
 	fileUtils "github.com/edoardottt/cariddi/internal/file"
 	sliceUtils "github.com/edoardottt/cariddi/internal/slice"
@@ -42,7 +42,6 @@ import (
 )
 
 func main() {
-
 
 	// Scan flags.
 	flags := input.ScanFlag()
@@ -94,7 +93,7 @@ func main() {
 		StoreResp:        flags.StoreResp,
 		MaxDepth:         flags.MaxDepth,
 		IgnoreExtensions: flags.IgnoreExtensions,
-		Rps:			  flags.Rps,
+		Rps:              flags.Rps,
 	}
 
 	// Read the targets from standard input.
@@ -150,7 +149,15 @@ func main() {
 		config.Headers = input.GetHeaders(headersInput)
 	}
 
-	limiter := ratelimit.New(context.Background(), config.Rps, time.Duration(time.Second))
+	// Rate limiter applied to the whole scan (all targets).
+	// When no -rps flag is provided (Rps = 0) an unlimited limiter is used,
+	// otherwise a plain token bucket would starve and block forever.
+	var limiter *ratelimit.Limiter
+	if config.Rps > 0 {
+		limiter = ratelimit.New(context.Background(), config.Rps, time.Second)
+	} else {
+		limiter = ratelimit.NewUnlimited(context.Background())
+	}
 
 	// For each target generate a crawler and collect all the results.
 	for _, target := range targets {

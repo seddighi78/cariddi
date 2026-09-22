@@ -105,7 +105,7 @@ type Input struct {
 	// webm, mkv, avi, mov, flv, wmv, mp3, wav, flac, ogg, m4a, aac, ico, cur, eot, otf)
 	IgnoreExtensions StringSlice
 
-	// Number of of requests per seconds at all
+	// Number of requests per second at all
 	Rps uint
 }
 
@@ -161,14 +161,14 @@ func ScanFlag() Input {
 
 	flag.Var(&ignoreExtensions, "ie", "Comma-separated list of extensions to ignore while scanning")
 
+	rps := flag.Uint("rps", 0, "Number of requests per second at all.")
+
 	flag.Parse()
 
 	// Default Extensions to filter
 	if ignoreExtensions == nil {
 		_ = ignoreExtensions.Set(DefaultIgnoreExtensions)
 	}
-
-	rps := flag.Int("rps", 0, "Number of of requests per seconds at all.")
 
 	result := Input{
 		*versionPtr,
